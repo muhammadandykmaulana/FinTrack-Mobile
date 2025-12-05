@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1715481234567,
+    "description": "Gaji Bulanan",
+    "amount": "5000000",
+    "type": "pemasukan",
+    "isRecurring": true,
+    "category": "belanja",
+    "notification": true,
+    "date": "2023-10-01",
+    "time": "08:00"
+  },
+  {
+    "id": 1715481239999,
+    "description": "Beli Bensin",
+    "amount": "25000",
+    "type": "pengeluaran",
+    "isRecurring": false,
+    "category": "transportasi",
+    "notification": false,
+    "date": "2023-10-02",
+    "time": "14:30"
+  }
+]

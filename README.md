@@ -1,1 +1,1 @@
-# FinTrack-Mobile
+# FinTrack-Mobile (Finansial Tracking) - Solusi Track Finansial Keluarga Anda

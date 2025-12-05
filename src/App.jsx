@@ -4,11 +4,10 @@ import {
   LayoutDashboard, Save, DollarSign, Calendar, 
   Clock, CheckSquare, ToggleLeft, ToggleRight,
   CreditCard, ArrowRight, ArrowLeft, Loader2,
-  Trash2, Edit, XCircle
+  Trash2, Edit, XCircle, Wallet, PlusCircle, X, Pencil // Tambahkan Pencil import
 } from 'lucide-react';
 
 // --- DATA AWAL (MOCK DATA) ---
-// Digabungkan langsung ke sini agar tidak perlu import file eksternal yang menyebabkan error.
 const initialData = [
   {
     "id": 1715481234567,
@@ -16,20 +15,20 @@ const initialData = [
     "amount": "5000000",
     "type": "pemasukan",
     "isRecurring": true,
-    "category": "belanja",
+    "category": "Income (gaji dll)",
     "notification": true,
-    "date": "2023-10-01",
-    "time": "08:00"
+    "date": "2023-11-25",
+    "time": "10:00"
   },
   {
     "id": 1715481239999,
-    "description": "Beli Kopi",
-    "amount": "25000",
+    "description": "Beli Bensin",
+    "amount": "30000",
     "type": "pengeluaran",
     "isRecurring": false,
-    "category": "makanan",
+    "category": "transportasi",
     "notification": false,
-    "date": "2023-10-02",
+    "date": "2025-12-02",
     "time": "14:30"
   }
 ];
@@ -51,13 +50,13 @@ const SplashScreen = ({ onFinish }) => {
         <DollarSign size={64} className="text-emerald-600" />
       </div>
       <h1 className="text-3xl font-bold tracking-wider">FinTrack</h1>
-      <p className="text-emerald-100 mt-2">Finansial Tracking - Solusi Track Finansial Keluarga Anda</p>
+      <p className="text-emerald-100 mt-2"> Track Finansial Keluarga Anda</p>
       <Loader2 className="animate-spin mt-8" size={24} />
     </div>
   );
 };
 
-// 2. Login Activity Component (Hardcoded Logic)
+// 2. Login Activity Component
 const LoginActivity = ({ onLogin, onForgotPassword }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -67,16 +66,12 @@ const LoginActivity = ({ onLogin, onForgotPassword }) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulasi loading network
     setTimeout(() => {
       setLoading(false);
-      
-      // LOGIC HARDCODE LOGIN
       if (username === 'melbukae' && password === 'okelah1234') {
-        // Jika benar, kirim nama aplikasi 'FinTrack' ke dashboard
         onLogin('FinTrack'); 
       } else {
-        alert("Username atau Password salah! (Hint: melbukae / okelah1234)");
+        alert("Error : Invalid Username & Password");
       }
     }, 1500);
   };
@@ -90,7 +85,7 @@ const LoginActivity = ({ onLogin, onForgotPassword }) => {
       </div>
       
       <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">Selamat Datang</h2>
-      <p className="text-center text-slate-500 mb-8">Silakan masuk ke akun Anda</p>
+      <p className="text-center text-slate-500 mb-8">Silahkan masuk ke akun Anda</p>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div className="space-y-1">
@@ -197,14 +192,201 @@ const ForgotPasswordActivity = ({ onBack }) => {
   );
 };
 
-// 4. Dashboard Input Fragment (REAL CRUD LOGIC)
+// --- UPDATE: Wallet Fragment (Halaman Dompet Dinamis + EDIT) ---
+const WalletFragment = () => {
+  // State untuk daftar dompet
+  const [wallets, setWallets] = useState([
+    { id: 1, name: 'Tunai (Cash)', balance: '1.500.000', color: 'bg-emerald-500' },
+    { id: 2, name: 'Bank BCA', balance: '8.250.000', color: 'bg-blue-600' },
+    { id: 3, name: 'GoPay', balance: '150.000', color: 'bg-sky-500' },
+    { id: 4, name: 'OVO', balance: '75.000', color: 'bg-purple-600' },
+  ]);
+
+  // State untuk form tambah/edit dompet
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingWalletId, setEditingWalletId] = useState(null); // ID dompet yg sedang diedit
+  const [newWalletName, setNewWalletName] = useState('');
+  const [newWalletBalance, setNewWalletBalance] = useState('');
+
+  // Fungsi saat tombol Edit (Pensil) diklik
+  const handleEditClick = (wallet) => {
+    setNewWalletName(wallet.name);
+    // Hapus titik ribuan agar bisa masuk ke input number
+    const plainBalance = wallet.balance.replace(/\./g, '');
+    setNewWalletBalance(plainBalance);
+    setEditingWalletId(wallet.id);
+    setIsAdding(true);
+  };
+
+  // Fungsi Simpan (Bisa Add Baru atau Update Lama)
+  const handleSaveWallet = () => {
+    if (!newWalletName || !newWalletBalance) {
+      alert("Nama dan Saldo harus diisi!");
+      return;
+    }
+
+    if (editingWalletId) {
+      // LOGIKA UPDATE (EDIT)
+      const updatedWallets = wallets.map(wallet => {
+        if (wallet.id === editingWalletId) {
+           // Tentukan ulang warna jika nama berubah (opsional, tapi bagus untuk UX)
+           let walletColor = wallet.color;
+           const lowerName = newWalletName.toLowerCase();
+           if (lowerName.includes('shopee')) walletColor = 'bg-orange-500';
+           else if (lowerName.includes('dana')) walletColor = 'bg-blue-500';
+           else if (lowerName.includes('linkaja')) walletColor = 'bg-red-500';
+           else if (lowerName.includes('jago')) walletColor = 'bg-yellow-500';
+           else if (lowerName.includes('bni')) walletColor = 'bg-teal-600';
+           else if (lowerName.includes('bri')) walletColor = 'bg-blue-700';
+
+           return {
+             ...wallet,
+             name: newWalletName,
+             balance: Number(newWalletBalance).toLocaleString('id-ID'),
+             color: walletColor
+           };
+        }
+        return wallet;
+      });
+      setWallets(updatedWallets);
+      alert("Data dompet berhasil diperbarui!");
+    } else {
+      // LOGIKA TAMBAH BARU
+      let walletColor = 'bg-slate-500';
+      const lowerName = newWalletName.toLowerCase();
+      
+      if (lowerName.includes('shopee')) walletColor = 'bg-orange-500';
+      else if (lowerName.includes('dana')) walletColor = 'bg-blue-500';
+      else if (lowerName.includes('linkaja')) walletColor = 'bg-red-500';
+      else if (lowerName.includes('jago')) walletColor = 'bg-yellow-500';
+      else if (lowerName.includes('bni')) walletColor = 'bg-teal-600';
+      else if (lowerName.includes('bri')) walletColor = 'bg-blue-700';
+      else walletColor = `bg-${['rose', 'indigo', 'pink', 'cyan'][Math.floor(Math.random()*4)]}-500`;
+
+      const newWallet = {
+        id: Date.now(),
+        name: newWalletName,
+        balance: Number(newWalletBalance).toLocaleString('id-ID'),
+        color: walletColor
+      };
+      setWallets([...wallets, newWallet]);
+      alert("Dompet baru berhasil ditambahkan!");
+    }
+    
+    // Reset form
+    handleCloseForm();
+  };
+
+  const handleCloseForm = () => {
+    setIsAdding(false);
+    setEditingWalletId(null);
+    setNewWalletName('');
+    setNewWalletBalance('');
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto pb-20 bg-slate-50 relative">
+      <div className="bg-emerald-600 p-6 text-white rounded-b-3xl shadow-lg mb-6">
+        <h3 className="text-xl font-bold">Dompet Saya</h3>
+        <p className="text-emerald-100 text-sm mt-1">Kelola semua sumber dana Anda</p>
+      </div>
+
+      <div className="px-5 space-y-4">
+        {wallets.map((wallet) => (
+          <div key={wallet.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between animate-fade-in group">
+             <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full ${wallet.color} flex items-center justify-center text-white shadow-md`}>
+                   <Wallet size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-700">{wallet.name}</h4>
+                  <p className="text-xs text-slate-400">Terhubung</p>
+                </div>
+             </div>
+             
+             <div className="flex items-center gap-3">
+                <div className="text-right">
+                    <span className="block text-xs text-slate-400">Saldo</span>
+                    <span className="font-mono font-bold text-slate-700">Rp {wallet.balance}</span>
+                </div>
+                {/* Tombol Edit */}
+                <button 
+                  onClick={() => handleEditClick(wallet)}
+                  className="bg-slate-100 p-2 rounded-full text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition"
+                >
+                  <Pencil size={16} />
+                </button>
+             </div>
+          </div>
+        ))}
+
+        {/* Tombol Tambah (Jika tidak sedang menambah/edit) */}
+        {!isAdding && (
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="w-full py-4 border-2 border-dashed border-emerald-200 rounded-xl flex flex-col items-center justify-center text-emerald-600 hover:bg-emerald-50 transition"
+          >
+             <PlusCircle size={24} className="mb-1"/>
+             <span className="font-bold text-sm">Tambah Dompet Baru</span>
+          </button>
+        )}
+
+        {/* Form Tambah/Edit Dompet (Overlay Modal Style) */}
+        {isAdding && (
+          <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-emerald-100 animate-fade-in mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="font-bold text-slate-700">
+                {editingWalletId ? "Edit Dompet" : "Tambah Akun Baru"}
+              </h4>
+              <button onClick={handleCloseForm} className="text-slate-400 hover:text-red-500">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-500">Nama Dompet / E-Wallet</label>
+                <input 
+                  type="text" 
+                  className="w-full border-b border-slate-300 py-2 focus:border-emerald-500 outline-none text-sm"
+                  placeholder="Contoh: Dana, ShopeePay, LinkAja"
+                  value={newWalletName}
+                  onChange={(e) => setNewWalletName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">Saldo (Rp)</label>
+                <input 
+                  type="number" 
+                  className="w-full border-b border-slate-300 py-2 focus:border-emerald-500 outline-none text-sm font-mono"
+                  placeholder="0"
+                  value={newWalletBalance}
+                  onChange={(e) => setNewWalletBalance(e.target.value)}
+                />
+              </div>
+              <button 
+                onClick={handleSaveWallet}
+                className="w-full bg-emerald-600 text-white font-bold py-2 rounded-lg mt-2 shadow hover:bg-emerald-700 transition"
+              >
+                {editingWalletId ? "Update Data" : "Simpan Dompet"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// 4. Dashboard Input Fragment (Home Page)
 const InputFragment = ({ username }) => {
   const initialFormState = {
     description: '',
     amount: '',
     type: 'pengeluaran',
     isRecurring: false,
-    category: 'makanan',
+    category: 'Income (gaji dll)',
     notification: true,
     date: new Date().toISOString().split('T')[0],
     time: '12:00'
@@ -212,21 +394,18 @@ const InputFragment = ({ username }) => {
 
   const [formData, setFormData] = useState(initialFormState);
   const [logs, setLogs] = useState([]);
-  const [editingId, setEditingId] = useState(null); // Untuk menandai mode Edit
+  const [editingId, setEditingId] = useState(null); 
 
-  // Load Data (READ) saat komponen pertama kali muncul
   useEffect(() => {
     const savedData = localStorage.getItem('fintrack_data');
     if (savedData) {
       setLogs(JSON.parse(savedData));
     } else {
-      // Jika kosong, load dari Data Awal (const)
       setLogs(initialData);
       localStorage.setItem('fintrack_data', JSON.stringify(initialData));
     }
   }, []);
 
-  // Simpan ke LocalStorage setiap ada perubahan pada 'logs'
   useEffect(() => {
     localStorage.setItem('fintrack_data', JSON.stringify(logs));
   }, [logs]);
@@ -235,7 +414,6 @@ const InputFragment = ({ username }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // CREATE & UPDATE Logic
   const handleSubmit = () => {
     if (!formData.description || !formData.amount) {
       alert("Deskripsi dan Jumlah harus diisi!");
@@ -243,7 +421,6 @@ const InputFragment = ({ username }) => {
     }
 
     if (editingId) {
-      // Logic UPDATE
       const updatedLogs = logs.map(item => 
         item.id === editingId ? { ...formData, id: editingId } : item
       );
@@ -251,24 +428,20 @@ const InputFragment = ({ username }) => {
       setEditingId(null);
       alert("Data berhasil diperbarui!");
     } else {
-      // Logic CREATE
       const newLog = { ...formData, id: Date.now() };
-      setLogs([newLog, ...logs]); // Tambah ke paling atas
+      setLogs([newLog, ...logs]); 
       alert("Data berhasil ditambahkan!");
     }
     
-    setFormData(initialFormState); // Reset form
+    setFormData(initialFormState);
   };
 
-  // EDIT Setup Logic
   const handleEdit = (item) => {
     setFormData(item);
     setEditingId(item.id);
-    // Scroll ke atas (opsional, agar form terlihat)
     document.getElementById('input-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // DELETE Logic
   const handleDelete = (id) => {
     if (window.confirm("Yakin ingin menghapus data ini?")) {
       const filteredLogs = logs.filter(item => item.id !== id);
@@ -281,7 +454,6 @@ const InputFragment = ({ username }) => {
     setFormData(initialFormState);
   };
 
-  // Hitung Saldo
   const totalBalance = logs.reduce((acc, curr) => {
     return curr.type === 'pemasukan' 
       ? acc + Number(curr.amount) 
@@ -347,7 +519,7 @@ const InputFragment = ({ username }) => {
             </div>
           </div>
 
-          {/* ToggleButton (Pemasukan/Pengeluaran) */}
+          {/* ToggleButton */}
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Jenis</label>
             <div className="flex bg-slate-100 p-1 rounded-lg">
@@ -397,7 +569,7 @@ const InputFragment = ({ username }) => {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Kategori</label>
               <div className="space-y-2">
-                {['makanan', 'transport', 'belanja'].map((cat) => (
+                {['Income (gaji dll)','makanan', 'transport', 'belanja', 'akomodasi'].map((cat) => (
                   <label key={cat} className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="radio" 
@@ -432,7 +604,6 @@ const InputFragment = ({ username }) => {
             </div>
           </div>
 
-          {/* Button Simpan/Update */}
           <button 
             onClick={handleSubmit}
             className={`w-full text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2 ${editingId ? 'bg-orange-500 hover:bg-orange-600' : 'bg-slate-800 hover:bg-slate-900'}`}
@@ -441,7 +612,6 @@ const InputFragment = ({ username }) => {
           </button>
         </div>
 
-        {/* --- LOG DISPLAY (READ, UPDATE, DELETE) --- */}
         <div className="mt-6 pb-4">
           <h5 className="font-bold text-slate-700 mb-3">Riwayat Transaksi ({logs.length})</h5>
           
@@ -453,8 +623,7 @@ const InputFragment = ({ username }) => {
                 <div key={log.id} className="bg-white p-3 rounded-lg border-l-4 shadow-sm text-xs relative group" 
                      style={{ borderColor: log.type === 'pemasukan' ? '#10b981' : '#ef4444' }}>
                   
-                  {/* Content */}
-                  <div className="pr-16"> {/* Padding right agar tidak tertutup tombol */}
+                  <div className="pr-16"> 
                     <div className="flex justify-between font-bold text-sm mb-1">
                       <span className="text-slate-800">{log.description}</span>
                     </div>
@@ -467,7 +636,6 @@ const InputFragment = ({ username }) => {
                     </div>
                   </div>
 
-                  {/* Action Buttons (Edit & Delete) */}
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-2">
                     <button 
                       onClick={() => handleEdit(log)}
@@ -498,11 +666,13 @@ const InputFragment = ({ username }) => {
 export default function App() {
   const [currentActivity, setCurrentActivity] = useState('splash');
   const [userSession, setUserSession] = useState(null);
+  const [activeTab, setActiveTab] = useState('home'); 
 
   const navigateToLogin = () => setCurrentActivity('login');
   const navigateToDashboard = (username) => {
     setUserSession(username);
     setCurrentActivity('dashboard');
+    setActiveTab('home'); 
   };
   const navigateToForgotPassword = () => setCurrentActivity('forgot-password');
   
@@ -523,17 +693,30 @@ export default function App() {
         
         {currentActivity === 'dashboard' && (
           <div className="h-full flex flex-col">
-            <InputFragment username={userSession} />
             
-            <div className="bg-white border-t border-slate-200 p-3 flex justify-around items-center absolute bottom-0 w-full pb-6 sm:pb-3">
-              <button className="flex flex-col items-center text-emerald-600">
+            {activeTab === 'home' ? (
+              <InputFragment username={userSession} />
+            ) : (
+              <WalletFragment />
+            )}
+            
+            <div className="bg-white border-t border-slate-200 p-3 flex justify-around items-center absolute bottom-0 w-full pb-6 sm:pb-3 z-10">
+              <button 
+                onClick={() => setActiveTab('home')}
+                className={`flex flex-col items-center transition ${activeTab === 'home' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'}`}
+              >
                 <LayoutDashboard size={20} />
                 <span className="text-[10px] font-bold mt-1">Home</span>
               </button>
-              <button className="flex flex-col items-center text-slate-400 hover:text-emerald-600">
+              
+              <button 
+                onClick={() => setActiveTab('wallet')}
+                className={`flex flex-col items-center transition ${activeTab === 'wallet' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'}`}
+              >
                 <CreditCard size={20} />
-                <span className="text-[10px] font-medium mt-1">Dompet</span>
+                <span className="text-[10px] font-bold mt-1">Dompet</span>
               </button>
+              
               <button onClick={() => setCurrentActivity('login')} className="flex flex-col items-center text-slate-400 hover:text-red-500">
                 <User size={20} />
                 <span className="text-[10px] font-medium mt-1">Keluar</span>
@@ -543,7 +726,7 @@ export default function App() {
         )}
 
         <div className="absolute top-0 w-full h-7 bg-black/20 backdrop-blur-md flex justify-between px-4 items-center z-50">
-          <span className="text-[10px] text-white font-medium">10:30</span>
+          <span className="text-[10px] text-white font-medium">07:30</span>
           <div className="flex gap-1">
             <div className="w-3 h-3 bg-white rounded-full opacity-80"></div>
             <div className="w-3 h-3 bg-white rounded-full opacity-60"></div>

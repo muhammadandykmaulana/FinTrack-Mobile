@@ -51,7 +51,7 @@ const SplashScreen = ({ onFinish }) => {
         <DollarSign size={64} className="text-emerald-600" />
       </div>
       <h1 className="text-3xl font-bold tracking-wider">FinTrack</h1>
-      <p className="text-emerald-100 mt-2">Finansial Tracking - Solusi Keluarga</p>
+      <p className="text-emerald-100 mt-2">Finansial Tracking - Solusi Track Finansial Keluarga Anda</p>
       <Loader2 className="animate-spin mt-8" size={24} />
     </div>
   );
